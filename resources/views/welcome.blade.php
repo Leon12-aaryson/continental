@@ -73,11 +73,84 @@
 
 <body>
     <div class="container">
+        @php
+            $countries = App\Models\Country::all();
+        @endphp
+        <select name="country" id="country1" class="form-control">
+            @foreach ($countries as $country)
+                <option value="{{ $country->id }}">{{ $country->name }}</option>
+            @endforeach
+        </select>
         <h1>API Documentation</h1>
         <p>Welcome to the API documentation. Below you will find information on how to use our APIs.</p>
 
         <div class="endpoint">
             <h2>Geocode API</h2>
+            <div class="mt-4">
+                @php
+                    $countries = App\Models\Country::all();
+                @endphp
+                <select name="country" id="country" class="form-control">
+                    <option value="">Select Country</option>
+                    @foreach ($countries as $country)
+                        <option value="{{ $country->id }}">{{ $country->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mt-4">
+                <select name="state" id="state" class="form-control" disabled>
+                    <option value="">Select State</option>
+                </select>
+            </div>
+
+            <div class="mt-4">
+                <select name="city" id="city" class="form-control" disabled>
+                    <option value="">Select City</option>
+                </select>
+            </div>
+
+            <script>
+                document.getElementById('country2').addEventListener('change', function() {
+                    var countryId = this.value;
+                    if (countryId) {
+                        fetch(`/api/states/${countryId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                var stateSelect = document.getElementById('state');
+                                stateSelect.innerHTML = '<option value="">Select State</option>';
+                                data.forEach(state => {
+                                    stateSelect.innerHTML += `<option value="${state.id}">${state.name}</option>`;
+                                });
+                                stateSelect.disabled = false;
+                            });
+                    } else {
+                        document.getElementById('state').innerHTML = '<option value="">Select State</option>';
+                        document.getElementById('state').disabled = true;
+                        document.getElementById('city').innerHTML = '<option value="">Select City</option>';
+                        document.getElementById('city').disabled = true;
+                    }
+                });
+
+                document.getElementById('state').addEventListener('change', function() {
+                    var stateId = this.value;
+                    if (stateId) {
+                        fetch(`/api/cities/${stateId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                var citySelect = document.getElementById('city');
+                                citySelect.innerHTML = '<option value="">Select City</option>';
+                                data.forEach(city => {
+                                    citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                                });
+                                citySelect.disabled = false;
+                            });
+                    } else {
+                        document.getElementById('city').innerHTML = '<option value="">Select City</option>';
+                        document.getElementById('city').disabled = true;
+                    }
+                });
+            </script>
             <p><strong>Endpoint:</strong> <code>/api/geocode</code></p>
             <p><strong>Method:</strong> GET</p>
             <p><strong>Description:</strong> This API takes an address and returns the corresponding coordinates.</p>
